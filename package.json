@@ -1,0 +1,41 @@
+{
+	"name": "fastpress",
+	"version": "1.0.0",
+	"main": "dist/index.js",
+	"scripts": {
+		"build": "tsc && tsc-alias",
+		"start": "node dist/main.js",
+		"dev": "nodemon --watch src/**/*.ts --exec tsx src/main.ts",
+		"production": "npm run build && npm start"
+	},
+	"author": "Cristian Alexander Rizo Gómez",
+	"description": "A fast and minimalistic web framework for Node.js, inspired by Express and built with TypeScript.",
+	"license": "MIT",
+	"type": "module",
+	"devDependencies": {
+		"@types/bcrypt": "6.0.0",
+		"@types/cors": "2.8.19",
+		"@types/express": "5.0.6",
+		"@types/jsonwebtoken": "9.0.10",
+		"nodemon": "3.1.11",
+		"reflect-metadata": "0.2.2",
+		"tsc-alias": "1.8.16",
+		"tsx": "4.19.2",
+		"typescript": "5.9.3"
+	},
+	"dependencies": {
+		"@prisma/adapter-better-sqlite3": "^7.4.0",
+		"@prisma/client": "7.4.0",
+		"bcrypt": "6.0.0",
+		"cors": "2.8.6",
+		"dotenv": "17.2.4",
+		"express": "5.2.1",
+		"glob": "13.0.1",
+		"install": "0.13.0",
+		"jsonwebtoken": "9.0.3",
+		"prisma": "7.4.0",
+		"redis": "5.11.0",
+		"winston": "3.19.0",
+		"zod": "4.3.6"
+	}
+}

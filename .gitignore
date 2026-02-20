@@ -1,0 +1,9 @@
+node_modules
+dist
+*.db
+*.log
+*.env
+tests
+logs
+/src/generated/prisma
+prisma.config.ts
