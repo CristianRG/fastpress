@@ -38,7 +38,7 @@ export * from './common/pipes/ZodValidationPipe';
 export * from './common/pipes/Pipe'; // Pipe model
 
 // Prisma instance
-export * from './common/prisma/index';
+export { default as prisma, getPrisma, initializePrisma } from './common/prisma/index';
 
 // Redis instance
 export * from './common/redis/index';

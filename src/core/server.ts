@@ -3,6 +3,7 @@ import cors from "cors";
 import conf, { initializeConfig } from "@/conf";
 import { registerControllers } from "./loader";
 import { discovery } from "./discovery";
+import { initializePrisma } from "@/common/prisma";
 
 const corsOptions: cors.CorsOptions = {
     origin: (origin, callback) => {
@@ -29,6 +30,7 @@ const createServer = async (onStart?: (app: Application) => void): Promise<Appli
 
     try {
         await initializeConfig();
+        initializePrisma();
         app = await bootstrap();
         const port = conf.PORT || 3000;
 
