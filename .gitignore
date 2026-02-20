@@ -6,4 +6,3 @@ dist
 tests
 logs
 /src/generated/prisma
-prisma.config.ts

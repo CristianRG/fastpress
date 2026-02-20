@@ -79,10 +79,25 @@ npm install
 ### 3) Prisma Configuration
 To start using the Prisma ORM, you need to make some configurations:
 
-Initialize Prisma. This will create the `prisma.config.ts` file and an `.env` file with your database connection URL (by default, Prisma uses PostgreSQL):
+Configure Prisma. You can customize the `prisma.config.ts` file and an `.env` file with your database connection URL:
+
+```ts
+// This is the default file provided by prisma
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  migrations: {
+    path: "prisma/migrations",
+  },
+  datasource: {
+    url: process.env["DATABASE_URL"],
+  },
+});
+```
+
+Create your .env file. You must create a .env file with the following variable:
 
 ```bash
-pnpx prisma init
+DATABASE_URL=<your_database_url>
 ```
 
 **Note:** Before proceeding, define your database provider in `prisma/schema.prisma` (this file is included in the repository because it contains authentication models required by the system) under the datasource block:
