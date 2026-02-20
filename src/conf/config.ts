@@ -24,4 +24,4 @@ function defineFastPressConfig(config: InternalConfig): InternalConfig {
     return config;
 }
 
-export { defineFastPressConfig };
+export { defineFastPressConfig, InternalConfig };

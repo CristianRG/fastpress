@@ -15,7 +15,7 @@ importers:
         specifier: 7.4.0
         version: 7.4.0(prisma@7.4.0(@types/react@19.2.14)(better-sqlite3@12.6.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
       bcrypt:
-        specifier: ^6.0.0
+        specifier: 6.0.0
         version: 6.0.0
       cors:
         specifier: 2.8.6
@@ -32,6 +32,9 @@ importers:
       install:
         specifier: 0.13.0
         version: 0.13.0
+      jiti:
+        specifier: ^2.6.1
+        version: 2.6.1
       jsonwebtoken:
         specifier: 9.0.3
         version: 9.0.3
@@ -49,7 +52,7 @@ importers:
         version: 4.3.6
     devDependencies:
       '@types/bcrypt':
-        specifier: ^6.0.0
+        specifier: 6.0.0
         version: 6.0.0
       '@types/cors':
         specifier: 2.8.19
