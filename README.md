@@ -173,7 +173,7 @@ model Session {
 
 #### Install Database Adapter
 
-Install the specific adapter for your chosen database provider. For more details, refer to the official Prisma [documentation](https://www.prisma.io/docs/orm/overview/databases).
+Install the specific adapter for your chosen database provider. For more details, refer to the official Prisma [documentation](https://www.prisma.io/docs/orm/core-concepts/supported-databases/database-drivers).
 
 #### Configure Fastpress
 
