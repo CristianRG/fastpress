@@ -47,7 +47,6 @@ export * from './common/redis/index';
 export * from './common/util/index';
 
 // Configuration
-export * from './conf/index';
 export * from './conf/config';
 
 // Core
