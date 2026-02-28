@@ -12,26 +12,37 @@ const corsOptions: cors.CorsOptions = {
     }
 };
 
-const bootstrap = async () => {
+const bootstrap = async (additionalControllers?: any[]) => {
     const modules = await discovery();
+    
+    const allControllers = [...modules, ...(additionalControllers || [])];
 
     const app = express();
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(cors(corsOptions));
 
-    registerControllers(app, modules);
+    registerControllers(app, allControllers);
 
     return app;
 };
 
-const createServer = async (onStart?: (app: Application) => void): Promise<Application> => {
+export interface CreateServerOptions {
+    controllers?: any[];
+    onStart?: (app: Application) => void;
+}
+
+const createServer = async (options?: CreateServerOptions | ((app: Application) => void)): Promise<Application> => {
     let app: Application;
+
+    const isLegacySignature = typeof options === 'function';
+    const onStart = isLegacySignature ? options : options?.onStart;
+    const controllers = isLegacySignature ? undefined : options?.controllers;
 
     try {
         await initializeConfig();
         initializePrisma();
-        app = await bootstrap();
+        app = await bootstrap(controllers);
         const port = conf.PORT || 3000;
 
         app.listen(port, () => {

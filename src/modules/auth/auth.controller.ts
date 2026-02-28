@@ -3,12 +3,26 @@ import { Req } from "@/common/decorators/Req";
 import { ZodValidationPipe } from "@/common/pipes/ZodValidationPipe";
 import { Controller } from "@/core/decorators/Controller";
 import { Get, Post } from "@/core/decorators/Methods";
-import { LoginUserSchema, LoginUserType, SignupUserSchema, SignupUserType } from "./auth.zod.schemas";
 import { AuthService } from "./auth.service";
 import { ServerResponse } from "@/shared/models/ServerResponse";
 import logger from "@/shared/repository/Logger";
-import { Request } from "express";
 import conf from "@/conf";
+
+import z from "zod";
+
+const LoginUserSchema = z.object({
+    email: z.string({ error: (iss) => iss.input === undefined ? "Email is required" : iss.message }).email(),
+    password: z.string({ error: (iss) => iss.input === undefined ? "Password is required" : iss.message }).min(6)
+});
+
+const SignupUserSchema = z.object({
+    email: z.string({ error: (iss) => iss.input === undefined ? "Email is required" : iss.message }).email(),
+    password: z.string({ error: (iss) => iss.input === undefined ? "Password is required" : iss.message }).min(6),
+    name: z.string({ error: (iss) => iss.input === undefined ? "Name is required" : iss.message }).min(2)
+});
+
+type LoginUserType = z.infer<typeof LoginUserSchema>;
+type SignupUserType = z.infer<typeof SignupUserSchema>;
 
 @Controller("/auth")
 class AuthController {
@@ -16,10 +30,10 @@ class AuthController {
     @Post("/login")
     async login(
         @Body(undefined, new ZodValidationPipe(LoginUserSchema)) body: LoginUserType,
-        @Req() req: Request
+        @Req() req: any
     ) {
         const { email, password } = body;
-        const sessionId = req.headers.cookie?.split(';').find(cookie => cookie.trim().startsWith('session='))?.split('=')[1] || undefined;
+        const sessionId = req.headers.cookie?.split(';').find((cookie:any) => cookie.trim().startsWith('session='))?.split('=')[1] || undefined;
         
         try {
             const user = await AuthService.login(email, password);
@@ -49,7 +63,7 @@ class AuthController {
                 });
             }
 
-            return new ServerResponse(200, "Login successful", { user });
+            return new ServerResponse(200, "Login successful", { user: { id: user.id, email: user.email, name: user.name } });
         } catch (error) {
             logger.error(`Login error for email ${email}: ${error instanceof Error ? error.message : String(error)}`);
             return new ServerResponse(401, "Invalid email or password");
@@ -59,7 +73,7 @@ class AuthController {
     @Post("/signup")
     async signup(
         @Body(undefined, new ZodValidationPipe(SignupUserSchema)) body: SignupUserType,
-        @Req() req: Request
+        @Req() req: any
     ) {
         const { email, password, name } = body;
 
@@ -89,7 +103,7 @@ class AuthController {
                 maxAge: rjwt.expiresIn
             });
 
-            return new ServerResponse(201, "Signup successful", { user });
+            return new ServerResponse(201, "Signup successful", { user: { id: user.id, email: user.email, name: user.name } });
         } catch (error) {
             logger.error(`Signup error for email ${email}: ${error instanceof Error ? error.message : String(error)}`);
             return new ServerResponse(400, error instanceof Error ? error.message : "Signup failed");
@@ -98,10 +112,10 @@ class AuthController {
 
     @Get("/refresh")
     async refresh(
-        @Req() req: Request
+        @Req() req: any
     ) {
         try {
-            const refreshToken = req.headers.cookie?.split(';').find(cookie => cookie.trim().startsWith('rjwt='))?.split('=')[1];
+            const refreshToken = req.headers.cookie?.split(';').find((cookie:any) => cookie.trim().startsWith('rjwt='))?.split('=')[1];
 
             if (!refreshToken) {
                 return new ServerResponse(401, "No refresh token provided");
@@ -121,7 +135,7 @@ class AuthController {
                 maxAge: jwt.expiresIn
             });
 
-            return new ServerResponse(200, "Token refreshed", { user });
+            return new ServerResponse(200, "Token refreshed", { user: { id: user.id, email: user.email, name: user.name } });
         } catch (error) {
             logger.error(`Refresh error: ${error instanceof Error ? error.message : String(error)}`);
             return new ServerResponse(401, "Invalid refresh token");

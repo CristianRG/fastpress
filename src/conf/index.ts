@@ -14,6 +14,7 @@ const defaultConfig = {
     RJWT_EXPIRATION: 7 * 24 * 60 * 60 * 1000, // 7 days
     LOGGER_INSTANCE: null as any,
     PRISMA_ADAPTER: null as any,
+    CONTROLLERS_PATH: "src"
 }
 
 const conf = { ...defaultConfig };
@@ -27,20 +28,25 @@ function printConfigDetails() {
 }
 
 async function loadUserConfig() {
-    const configPath = resolve(process.cwd(), 'fastpress.config.ts');
+    const possibleExtensions = ['.ts', '.js', '.mjs', '.cjs'];
     const jiti = createJiti(import.meta.url);
 
-    if (existsSync(configPath)) {
-        try {
-            const configUrl = pathToFileURL(configPath).href;
-            const userConfigModule = await jiti.import(configUrl, { default: true });
-            return userConfigModule as InternalConfig;
-        } catch (error) {
-            console.warn('We cant load fastpress.config.ts:', error);
-            return undefined;
+    for (const ext of possibleExtensions) {
+        const configPath = resolve(process.cwd(), `fastpress.config${ext}`);
+        
+        if (existsSync(configPath)) {
+            try {
+                const configUrl = pathToFileURL(configPath).href;
+                const userConfigModule = await jiti.import(configUrl, { default: true });
+                return userConfigModule as InternalConfig;
+            } catch (error) {
+                console.warn(`Failed to load fastpress.config${ext}:`, error);
+                continue;
+            }
         }
     }
 
+    console.log('No fastpress.config.ts found. Using default configuration.');
     return undefined;
 }
 
@@ -61,6 +67,7 @@ export async function initializeConfig() {
         conf.RJWT_EXPIRATION = userConfig.jwt?.refresh_exp ?? defaultConfig.RJWT_EXPIRATION;
         conf.LOGGER_INSTANCE = userConfig.server?.logger ?? defaultConfig.LOGGER_INSTANCE;
         conf.PRISMA_ADAPTER = userConfig.server?.prismaAdapter ?? defaultConfig.PRISMA_ADAPTER;
+        conf.CONTROLLERS_PATH = userConfig.server?.controllersPath ?? defaultConfig.CONTROLLERS_PATH;
         printConfigDetails();
     }
 

@@ -2,6 +2,8 @@
 
 Fastpress is an open-source project designed to empower developers to build backend applications easily. It features a clean, modern syntax inspired by major frameworks like SpringBoot, bringing that familiar structure to Node.js with TypeScript.
 
+> **TypeScript Required:** Fastpress is a TypeScript-first framework that leverages decorators and advanced TypeScript features. Your application must be written in TypeScript.
+
 ## Features
 
 - **Integrated Daemon**: Includes a development mode that monitors .ts files. The server restarts automatically upon changes, eliminating the need for manual restarts.
@@ -18,7 +20,7 @@ Fastpress is an open-source project designed to empower developers to build back
 
 - **Centralized Configuration**: Allows you to change the behavior of certain elements in the application, such as the Prisma adapter or the logging system, through a centralized configuration file.
 
-- **Authentication**: Includes an authentication controller and middleware by default, using JWT for a token-based authentication method with refresh tokens and access tokens.
+- **Authentication Module**: Includes a ready-to-use authentication controller and service with JWT-based authentication (access tokens and refresh tokens). Simply import and use it in your project.
 
 
 ## Usage Example
@@ -26,6 +28,9 @@ Fastpress is an open-source project designed to empower developers to build back
 Fastpress uses decorators and Zod schemas to keep your code clean and validated:
 
 ```typescript
+import { z } from 'zod';
+import { Controller, Get, Post, Body, Query, User, UseMiddleware, Auth, Sanitizer, ServerResponse, ParseIntPipe, ZodValidationPipe } from '@cristianrg/fastpress';
+
 const CreateUserSchema = z.object({
     name: z.string().min(3).max(50),
     email: z.string().email(),
@@ -55,6 +60,8 @@ class UserController {
         return new ServerResponse(201, "User created", { data, createdBy: user });
     }
 }
+
+export default UserController;
 ```
 
 ## Installation and Setup
@@ -82,21 +89,103 @@ or if you're using npm:
 npm init -y
 ```
 
-### 2) Install Fastpress
+### 2) Install Dependencies
 
-Add the **fastpress** dependency to your project:
+Fastpress requires **TypeScript** to work properly. Install the framework along with required dependencies:
 
 ```bash
-pnpm add @cristianrg/fastpress
+pnpm add @cristianrg/fastpress @prisma/client
+pnpm add -D prisma typescript @types/node
 ```
 
 or using npm:
 
 ```bash
-npm i @cristianrg/fastpress
+npm i @cristianrg/fastpress @prisma/client
+npm i -D prisma typescript @types/node
 ```
 
-### 3) Prisma Configuration
+> **Important:** Fastpress is a TypeScript-first framework. Your controllers must be written in TypeScript (`.ts` files) due to the use of decorators and other TypeScript features.
+
+**Optional - For development with auto-reload:**
+
+```bash
+pnpm add -D nodemon
+```
+
+or using npm:
+
+```bash
+npm i -D nodemon
+```
+
+### 3) TypeScript Configuration
+
+Create a `tsconfig.json` file in your project root with the following minimum configuration:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
+```
+
+> **Note:** The `experimentalDecorators` and `emitDecoratorMetadata` options are **required** for the framework to work correctly.
+
+### 4) Package.json Scripts
+
+Add the following to your `package.json`:
+
+```json
+{
+  "name": "my-fastpress-app",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon --watch src --ext ts --exec \"npm run build && npm start\""
+  },
+  "dependencies": {
+    "@cristianrg/fastpress": "^1.1.0",
+    "@prisma/client": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "prisma": "^5.0.0",
+    "typescript": "^5.0.0",
+    "nodemon": "^3.0.0"
+  }
+}
+```
+
+**Script descriptions:**
+- `build`: Compiles TypeScript to JavaScript
+- `start`: Runs the compiled application
+- `dev`: Watches for changes and automatically rebuilds (requires nodemon)
+
+> **Important:** The `"type": "module"` field is required for ESM support.
+
+### 5) Prisma Configuration
 
 Before you begin, you need to initialize Prisma and configure a few settings.
 
@@ -177,16 +266,43 @@ Install the specific adapter for your chosen database provider. For more details
 
 #### Configure Fastpress
 
-Create a `fastpress.config.ts` file in the project root and configure the database adapter:
+Create a `fastpress.config.ts` file in the project root and configure the database adapter and other options:
 
 ```typescript
+import { defineFastPressConfig } from '@cristianrg/fastpress';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+
 export default defineFastPressConfig({
     server: {
+        port: 3000,
+        env: process.env.NODE_ENV || 'development',
+        controllersPath: process.env.NODE_ENV === 'production' ? 'dist' : 'src',
         prismaAdapter: new PrismaBetterSqlite3({ url: process.env.DATABASE_URL || 'file:./dev.db' }),
-        // You can add other configurations...
+        allowedOrigins: ['http://localhost:3000']
     },
+    jwt: {
+        secret: process.env.JWT_SECRET,
+        algorithm: 'HS256',
+        jwt_exp: 15 * 60 * 1000, // 15 minutes
+        refresh_exp: 7 * 24 * 60 * 60 * 1000 // 7 days
+    }
 });
 ```
+
+**Configuration Options:**
+
+- `server.port`: Port where the server will run (default: 3000)
+- `server.env`: Environment mode (default: 'development')
+- `server.controllersPath`: Directory where controllers are located. Use `'src'` for development (TypeScript files) and `'dist'` for production (compiled JavaScript files). Controllers must be inside a `modules/` folder within this path. Default: `'src'`
+- `server.prismaAdapter`: Prisma database adapter (required)
+- `server.allowedOrigins`: CORS allowed origins
+- `server.logger`: Custom logger instance (optional)
+- `jwt.secret`: JWT secret key
+- `jwt.algorithm`: JWT algorithm ('HS256' or 'RS256')
+- `jwt.jwt_exp`: Access token expiration in milliseconds
+- `jwt.refresh_exp`: Refresh token expiration in milliseconds
+
+> **Important:** Controllers must be placed inside a `modules/` folder within your `controllersPath`. For example: `src/modules/users/user.controller.ts` or `dist/modules/users/user.controller.js`
 
 #### Synchronize Database and Generate Types
 
@@ -205,6 +321,92 @@ npx prisma generate
 ```
 
 Your Fastpress project is now ready to use! You can start creating controllers and building your backend application.
+
+### 6) Project Structure
+
+Your project structure should look like this:
+
+```
+my-fastpress-app/
+├── src/
+│   ├── modules/
+│   │   └── users/
+│   │       └── user.controller.ts
+│   └── index.ts
+├── prisma/
+│   └── schema.prisma
+├── .env
+├── fastpress.config.ts
+├── prisma.config.ts
+├── tsconfig.json
+└── package.json
+```
+
+Create your main entry file `src/index.ts`:
+
+```typescript
+import { createServer } from '@cristianrg/fastpress';
+
+await createServer();
+```
+
+Then create your first controller in `src/modules/users/user.controller.ts`:
+
+```typescript
+import { Controller, Get, ServerResponse } from '@cristianrg/fastpress';
+
+@Controller("/users")
+class UserController {
+    @Get("/")
+    getAll() {
+        return new ServerResponse(200, "Users list", { users: [] });
+    }
+}
+
+export default UserController;
+```
+
+### 7) Running Your Application
+
+**Development mode (with auto-reload):**
+
+```bash
+npm run dev
+```
+
+**Production mode:**
+
+```bash
+npm run build
+npm start
+```
+
+### 8) Using Built-in Authentication (Optional)
+
+Fastpress includes a ready-to-use authentication module with JWT support. To use it, you need to explicitly import and register it in your application:
+
+```typescript
+import { createServer, AuthController } from '@cristianrg/fastpress';
+
+// The AuthController will be automatically discovered if placed in your modules folder,
+// or you can import it directly from the package
+await createServer({
+    controllers: [AuthController], // Explicitly register if not using file-based discovery
+});
+```
+
+The `AuthController` provides the following endpoints:
+- `POST /auth/login` - User login with email and password
+- `POST /auth/signup` - User registration
+- `GET /auth/refresh` - Refresh access token using refresh token
+
+You can also use the `AuthService` and auth schemas:
+
+```typescript
+import { AuthService, AuthController } from '@cristianrg/fastpress';
+```
+
+**Note:** Controllers placed in `src/modules/` (or `dist/modules/` in production) with the pattern `*.controller.ts` are automatically discovered and registered. The framework searches recursively inside the `modules/` folder, so you can organize your controllers in subdirectories (e.g., `src/modules/users/user.controller.ts`, `src/modules/auth/auth.controller.ts`). You don't need to manually register them unless you want to use controllers from the framework package (like `AuthController`).
 
 ## Roadmap
 Fastpress is in its early stages. Future milestones include:

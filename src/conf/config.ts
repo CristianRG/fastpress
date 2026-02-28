@@ -5,6 +5,7 @@ interface ServerConfig {
     allowedOrigins?: string[];
     env?: string;
     logger?: Logger;
+    controllersPath?: string;
     prismaAdapter: any;
 }
 

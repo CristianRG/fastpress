@@ -51,3 +51,8 @@ export * from './conf/config';
 
 // Core
 export * from './core/server';
+export type { CreateServerOptions } from './core/server';
+
+// Internal Modules (Auth)
+export { default as AuthController } from './modules/auth/auth.controller';
+export { AuthService } from './modules/auth/auth.service';

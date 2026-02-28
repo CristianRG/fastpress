@@ -71,5 +71,5 @@ class Logger extends LoggerModel {
 }
 
 const logger = Logger.getInstance();
-logger.setLogger(conf.LOGGER_INSTANCE ? new DefaultLogger() : conf.LOGGER_INSTANCE);
+logger.setLogger(conf.LOGGER_INSTANCE === null || conf.LOGGER_INSTANCE === undefined ? new DefaultLogger() : conf.LOGGER_INSTANCE);
 export default logger;
