@@ -265,9 +265,13 @@ Install the specific adapter for your chosen database provider. For more details
 
 Create a `fastpress.config.ts` file in the project root and configure the database adapter and other options:
 
+> **Note** If you do not have **dotenv** installed, you can do so with the following command: `npm i dotenv`.
+
 ```typescript
 import { defineFastPressConfig } from '@cristianrg/fastpress';
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+import { config } from "dotenv";
+config();
 
 export default defineFastPressConfig({
     server: {
