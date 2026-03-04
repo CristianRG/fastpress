@@ -139,9 +139,6 @@ Create a `tsconfig.json` file in your project root with the following minimum co
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
@@ -166,14 +163,14 @@ Add the following to your `package.json`:
     "dev": "nodemon --watch src --ext ts --exec \"npm run build && npm start\""
   },
   "dependencies": {
-    "@cristianrg/fastpress": "^1.1.0",
-    "@prisma/client": "^5.0.0"
+    "@cristianrg/fastpress": "^1.1.1",
+    "@prisma/client": ">=5.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "prisma": "^5.0.0",
-    "typescript": "^5.0.0",
-    "nodemon": "^3.0.0"
+    "@types/node": "^25.3.3",
+    "prisma": ">=5.0.0",
+    "typescript": "^5.9.3",
+    "nodemon": "^3.1.11"
   }
 }
 ```
