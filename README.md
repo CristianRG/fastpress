@@ -28,8 +28,7 @@ Fastpress is an open-source project designed to empower developers to build back
 Fastpress uses decorators and Zod schemas to keep your code clean and validated:
 
 ```typescript
-import { z } from 'zod';
-import { Controller, Get, Post, Body, Query, User, UseMiddleware, Auth, Sanitizer, ServerResponse, ParseIntPipe, ZodValidationPipe } from '@cristianrg/fastpress';
+import { z, Controller, Get, Post, Body, Query, User, Req, UseMiddleware, Auth, Sanitizer, ServerResponse, ParseIntPipe, ZodValidationPipe, Context } from '@cristianrg/fastpress';
 
 const CreateUserSchema = z.object({
     name: z.string().min(3).max(50),
@@ -58,6 +57,14 @@ class UserController {
         @User() user: UserModel
     ) {
         return new ServerResponse(201, "User created", { data, createdBy: user });
+    }
+
+    @Get("/custom")
+    customHandler(
+        @Req() req: Context.Request  // Access to Express Request with full typing
+    ) {
+        const userAgent = req.headers['user-agent'];
+        return new ServerResponse(200, "Custom handler", { userAgent });
     }
 }
 
@@ -91,19 +98,21 @@ npm init -y
 
 ### 2) Install Dependencies
 
-Fastpress requires **TypeScript** to work properly. Install the framework along with required dependencies:
+Fastpress requires **TypeScript** and **Zod** to work properly. Install the framework along with required dependencies:
 
 ```bash
-pnpm add @cristianrg/fastpress @prisma/client
+pnpm add @cristianrg/fastpress @prisma/client zod
 pnpm add -D prisma typescript @types/node
 ```
 
 or using npm:
 
 ```bash
-npm i @cristianrg/fastpress @prisma/client
+npm i @cristianrg/fastpress @prisma/client zod
 npm i -D prisma typescript @types/node
 ```
+
+> **Note:** Zod is required as a peer dependency for validation with `ZodValidationPipe`. Prisma is required for database operations.
 
 > **Important:** Fastpress is a TypeScript-first framework. Your controllers must be written in TypeScript (`.ts` files) due to the use of decorators and other TypeScript features.
 
@@ -164,7 +173,8 @@ Add the following to your `package.json`:
   },
   "dependencies": {
     "@cristianrg/fastpress": "^1.1.1",
-    "@prisma/client": ">=5.0.0"
+    "@prisma/client": ">=5.0.0",
+    "zod": ">=3.0.0"
   },
   "devDependencies": {
     "@types/node": "^25.3.3",

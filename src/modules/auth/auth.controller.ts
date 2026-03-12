@@ -9,6 +9,7 @@ import logger from "@/shared/repository/Logger";
 import conf from "@/conf";
 
 import z from "zod";
+import { Context } from "@/shared/models/Context";
 
 const LoginUserSchema = z.object({
     email: z.string({ error: (iss) => iss.input === undefined ? "Email is required" : iss.message }).email(),
@@ -30,10 +31,10 @@ class AuthController {
     @Post("/login")
     async login(
         @Body(undefined, new ZodValidationPipe(LoginUserSchema)) body: LoginUserType,
-        @Req() req: any
+        @Req() req: Context.Request
     ) {
         const { email, password } = body;
-        const sessionId = req.headers.cookie?.split(';').find((cookie:any) => cookie.trim().startsWith('session='))?.split('=')[1] || undefined;
+        const sessionId = req.headers.cookie?.split(';').find((cookie) => cookie.trim().startsWith('session='))?.split('=')[1] || undefined;
         
         try {
             const user = await AuthService.login(email, password);
@@ -73,7 +74,7 @@ class AuthController {
     @Post("/signup")
     async signup(
         @Body(undefined, new ZodValidationPipe(SignupUserSchema)) body: SignupUserType,
-        @Req() req: any
+        @Req() req: Context.Request
     ) {
         const { email, password, name } = body;
 
@@ -112,10 +113,10 @@ class AuthController {
 
     @Get("/refresh")
     async refresh(
-        @Req() req: any
+        @Req() req: Context.Request
     ) {
         try {
-            const refreshToken = req.headers.cookie?.split(';').find((cookie:any) => cookie.trim().startsWith('rjwt='))?.split('=')[1];
+            const refreshToken = req.headers.cookie?.split(';').find((cookie) => cookie.trim().startsWith('rjwt='))?.split('=')[1];
 
             if (!refreshToken) {
                 return new ServerResponse(401, "No refresh token provided");

@@ -32,3 +32,9 @@ export class Context<T extends ContextOptions = ContextOptions> {
         this.user = (req as any).user as Omit<User, 'password'> | undefined; // Assuming authentication middleware attaches user to req
     }
 }
+
+export namespace Context {
+    export type Request = import('express').Request;
+    export type Response = import('express').Response;
+    export type NextFunction = import('express').NextFunction;
+}

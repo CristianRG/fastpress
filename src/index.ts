@@ -7,6 +7,7 @@ export * from './core/decorators/UseHooks';
 
 // Models
 export * from './shared/models/Context';
+export type { Request, Response, NextFunction } from 'express'; // Re-export Express types for convenience
 export * from './shared/models/Guard';
 export * from './shared/models/Hook';
 export * from './shared/models/Logger';
@@ -28,9 +29,6 @@ export * from './common/decorators/Param';
 export * from './common/decorators/Query';
 export * from './common/decorators/Req';
 export * from './common/decorators/User';
-
-// Common loggers
-export * from './common/loggers/Winston';
 
 // Common pipes
 export * from './common/pipes/ParseIntPipe';
@@ -56,3 +54,6 @@ export type { CreateServerOptions } from './core/server';
 // Internal Modules (Auth)
 export { default as AuthController } from './modules/auth/auth.controller';
 export { AuthService } from './modules/auth/auth.service';
+
+// Re-export Zod for convenience (peer dependency)
+export { z, type ZodSchema, type ZodType, type ZodError } from 'zod';
