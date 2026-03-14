@@ -6,6 +6,7 @@ import { ServerResponse } from "@/shared/models/ServerResponse";
 import { ParseIntPipe } from "@/common/pipes/ParseIntPipe";
 import { UseMiddleware } from "@/core/decorators/UseMiddleware";
 import { Auth } from "@/shared/middlewares/Auth";
+import { Pagination, type PaginationParams } from "@/common/decorators/Pagination";
 
 @UseMiddleware(Auth)
 /**
@@ -22,15 +23,20 @@ export class BaseController<T extends keyof PrismaModels, S extends Service<T> =
 
     @Get("/")
     async get(
-        @Query("skip", ParseIntPipe) skip: number,
-        @Query("take", ParseIntPipe) take: number,
+        @Pagination() pagination: PaginationParams
     ) {
         const items = await this.service.findAll({
-            skip,
-            take
+            skip: (pagination.page - 1) * pagination.pageSize,
+            take: pagination.pageSize >= 100 ? 100 : pagination.pageSize, // Limit pageSize to a maximum of 100 to prevent excessive data retrieval
         });
 
-        return new ServerResponse(200, `Found ${items.length} items in ${String(this.service.getModelName())} table`, items);
+        return new ServerResponse(200, `Found ${items.length} items in ${String(this.service.getModelName())} table`, {
+            results: items,
+            meta: {
+                page: pagination.page,
+                pageSize: pagination.pageSize,
+            }
+        });
     }
 
     @Get("/:id")
