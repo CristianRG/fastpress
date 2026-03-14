@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { Pipe } from "../pipes/Pipe";
 
 const PARAM_METADATA_KEY = "custom:params";
-type ParamType = "param" | "query" | "body" | "user" | "request" | "response";
+type ParamType = "param" | "query" | "body" | "user" | "request" | "response" | "pagination";
 export type PipeType = Pipe | (new (...args: any[]) => Pipe);
 
 export interface ParamMetadata {

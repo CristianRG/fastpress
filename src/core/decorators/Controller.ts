@@ -47,7 +47,15 @@ const paramTypeStrategy = {
     "body": (ctx: Context, propertyKey?: string) => propertyKey ? ctx.body[propertyKey] : ctx.body,
     "user": (ctx: Context) => ctx.user,
     "request": (ctx: Context) => ctx.req,
-    "response": (ctx: Context) => ctx.res
+    "response": (ctx: Context) => ctx.res,
+    "pagination": (ctx: Context) => {
+        const { page = 1, pageSize = 10, ...rest } = ctx.query;
+        return {
+            page: parseInt(page as string, 10) <= 0 ? 1 : parseInt(page as string, 10),
+            pageSize: parseInt(pageSize as string, 10) <= 0 ? 10 : parseInt(pageSize as string, 10),
+            ...rest
+        }
+    }
 }
 
 async function handleParams(ctx: Context, paramMetadata: ParamMetadata[]): Promise<any[]> {
