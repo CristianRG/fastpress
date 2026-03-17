@@ -29,6 +29,7 @@ export * from './common/decorators/Param';
 export * from './common/decorators/Query';
 export * from './common/decorators/Req';
 export * from './common/decorators/User';
+export * from './common/decorators/Pagination';
 
 // Common pipes
 export * from './common/pipes/ParseIntPipe';
